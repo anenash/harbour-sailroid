@@ -2,7 +2,7 @@ import QtQuick 2.6
 import QtMultimedia 5.6
 import Sailfish.Silica 1.0
 
-import snake.Game 1.0
+import arkanoid.Game 1.0
 
 import "../components"
 
@@ -30,35 +30,35 @@ Page {
         id: soundStart
 
         source: "../sounds/select.wav"
-        muted: snakeGame.muted
+        muted: arkanoidGame.muted
     }
 
     SoundEffect {
-        id: soundLineRemoved
+        id: soundTargetHit
 
         source: "../sounds/remove_line.wav"
-        muted: snakeGame.muted
+        muted: arkanoidGame.muted
     }
 
     SoundEffect {
         id: soundMoved
 
         source: "../sounds/move.wav"
-        muted: snakeGame.muted
+        muted: arkanoidGame.muted
     }
 
     SoundEffect {
         id: soundRotate
 
         source: "../sounds/turn.wav"
-        muted: snakeGame.muted
+        muted: arkanoidGame.muted
     }
 
     SoundEffect {
         id: soundGameOver
 
         source: "../sounds/gameOver.wav"
-        muted: snakeGame.muted
+        muted: arkanoidGame.muted
     }
 
     Database {
@@ -66,23 +66,23 @@ Page {
     }
 
     Game {
-        id: snakeGame
+        id: arkanoidGame
 
         onScoreChanged: {
             if(score > parseInt(hightScore)) {
-                database.storeData("snakeGame", score)
+                database.storeData("arkanoidGame", score)
             }
-            database.readRecord("snakeGame")
+            database.readRecord("arkanoidGame")
         }
 
         onMutedChanged: {
-            if(!soundStart.playing && !snakeGame.muted) {
+            if(!soundStart.playing && !arkanoidGame.muted) {
                 soundStart.play()
             }
         }
 
         onStartedChanged: {
-            if(!soundStart.playing && snakeGame.started) {
+            if(!soundStart.playing && arkanoidGame.started) {
                 root.gameOver = false
                 soundStart.play()
             }
@@ -101,27 +101,28 @@ Page {
             }
         }
 
-        onSnakeMove: {
-            if(!soundMoved.playing && snakeGame.started) {
+        onBallMove: {
+            if(!soundMoved.playing) {
                 soundMoved.play()
             }
         }
 
-        onEatApple: {
-            if(!soundLineRemoved.playing && snakeGame.started) {
-                soundLineRemoved.play()
+        onTargetsChanged: {
+            app.targetsCount = targets
+            if(!soundTargetHit.playing) {
+                soundTargetHit.play()
             }
         }
     }
 
     onActiveAppChanged: {
         if (activeApp !== Qt.ApplicationActive) {
-            app.coverLevel = snakeGame.level
-            app.coverScore = snakeGame.score
-            app.applesCount = snakeGame.apples
-            if (snakeGame.started)
+            app.coverLevel = arkanoidGame.level
+            app.coverScore = arkanoidGame.score
+            app.targetsCount = arkanoidGame.targets
+            if (arkanoidGame.started)
             {
-                snakeGame.pause(true)
+                arkanoidGame.pause(true)
             }
         }
     }
@@ -137,16 +138,12 @@ Page {
     Component.onCompleted: {
         console.log("App version", Qt.application.version)
         database.initDatabase()
-        database.readRecord("snakeGame")
+        database.readRecord("arkanoidGame")
     }
 
     SilicaFlickable {
         anchors.fill: parent
         contentHeight: root.height
-
-        PageHeader {
-            title: "Main"
-        }
 
         Loader {
             id: gameBoard

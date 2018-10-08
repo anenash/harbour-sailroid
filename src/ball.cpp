@@ -5,22 +5,20 @@ Ball::Ball(QObject *parent) : QObject(parent)
 
 }
 
-void Ball::upLeft()
+void Ball::setStartPosition(QPoint point)
 {
-
+    m_ball = point;
 }
 
-void Ball::upRight()
+void Ball::moveBall(QPoint point)
 {
-
+    if (m_ball != point)
+    {
+        m_ball = point;
+    }
 }
 
-void Ball::downLeft()
+bool Ball::contains(QPoint point)
 {
-
-}
-
-void Ball::downRight()
-{
-
+    return m_ball == point;
 }

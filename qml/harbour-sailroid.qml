@@ -4,7 +4,13 @@ import "pages"
 
 ApplicationWindow
 {
-    initialPage: Component { FirstPage { } }
+    id: app
+
+    property string coverScore: "0"
+    property string coverLevel: "0"
+    property string targetsCount: "0"
+
+    initialPage: Component { GamePage { } }
     cover: Qt.resolvedUrl("cover/CoverPage.qml")
     allowedOrientations: defaultAllowedOrientations
 }

@@ -1,8 +1,6 @@
-#ifdef QT_QML_DEBUG
 #include <QtQuick>
-#endif
-
 #include <sailfishapp.h>
+#include "gameboard.h"
 
 int main(int argc, char *argv[])
 {
@@ -15,6 +13,9 @@ int main(int argc, char *argv[])
     //   - SailfishApp::pathToMainQml() to get a QUrl to the main QML file
     //
     // To display the view, call "show()" (will show fullscreen on device).
+
+    qmlRegisterType<QmlPiece>();
+    qmlRegisterType<GameBoard>("arkanoid.Game", 1, 0, "Game");
 
     return SailfishApp::main(argc, argv);
 }

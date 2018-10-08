@@ -13,9 +13,14 @@ class Trampoline: public QObject
 public:
     explicit Trampoline(QObject *parent = nullptr);
 
-public slots:
-    void moveLeft();
-    void moveRight();
+    void addPoint(QPoint point);
+    bool contains(QPoint point);
+    QPoint getLeftPoint() const;
+    QPoint getRightPoint() const;
+    void moveLeft(QPoint point);
+    void moveRight(QPoint point);
+
+    void clear() { m_trampoline.clear(); }
 
 private:
     QVector<QPoint> m_trampoline;

@@ -1,5 +1,5 @@
 Name: harbour-sailroid
-Summary: My Sailfish OS Application
+Summary: Arkanoid game for Sailfish OS
 Version: 0.1
 Release: 1
 # The contents of the Group field should be one of the groups listed here:
@@ -12,7 +12,7 @@ License: LICENSE
 Sources:
 - '%{name}-%{version}.tar.bz2'
 Description: |
-  Short description of my Sailfish OS Application
+  Bricks game arkanoid version for Sailfish OS
 Configure: none
 # The qtc5 builder inserts macros to allow QtCreator to have fine
 # control over qmake/make execution
@@ -32,7 +32,7 @@ PkgConfigBR:
 
 # Runtime dependencies which are not automatically detected
 Requires:
-  - sailfishsilica-qt5 >= 0.10.9 
+  - sailfishsilica-qt5 >= 0.10.9
 
 # All installed files
 Files:

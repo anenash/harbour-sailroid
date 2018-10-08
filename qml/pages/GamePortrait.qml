@@ -28,6 +28,18 @@ Item {
         }
     }
 
+    Rectangle {
+        id: gameFieldBorders
+
+        anchors.centerIn: game
+        height: game.height + Theme.horizontalPageMargin
+        width: game.width + Theme.horizontalPageMargin
+
+        color: "transparent"
+        border.color: "black"
+        border.width: 4
+    }
+
     Item {
         id: game
 
@@ -94,7 +106,7 @@ Item {
             onClicked: {
                 settingsEnabled = !settingsEnabled
                 if (settingsEnabled) {
-                    snakeGame.pause(true)
+                    arkanoidGame.pause(true)
                 }
             }
         }
@@ -109,13 +121,13 @@ Item {
                     return
                 }
 
-                if (!snakeGame.started) {
-                    snakeGame.start()
+                if (!arkanoidGame.started) {
+                    arkanoidGame.start()
                 } else {
-                    if (snakeGame.paused) {
-                        snakeGame.pause(false)
+                    if (arkanoidGame.paused) {
+                        arkanoidGame.pause(false)
                     } else {
-                        snakeGame.pause(true)
+                        arkanoidGame.pause(true)
                     }
                 }
             }
@@ -126,7 +138,7 @@ Item {
             title: "Reset"
 
             onClicked: {
-                snakeGame.reset()
+                arkanoidGame.reset()
             }
         }
         GameButton {
@@ -135,7 +147,7 @@ Item {
             title: "Mute"
 
             onClicked: {
-                snakeGame.mute()
+                arkanoidGame.mute()
             }
         }
     }

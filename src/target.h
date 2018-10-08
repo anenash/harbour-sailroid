@@ -12,8 +12,10 @@ class Target : public QObject
 public:
     explicit Target(QObject *parent = nullptr);
 
-    void addTarget(QPoint point, bool active);
+    void addTarget(QPoint point);
     bool contains(QPoint point);
+    bool empty();
+    void removeTarget(QPoint point);
 
 signals:
     void hit(QPoint point);
@@ -21,7 +23,8 @@ signals:
 public slots:
 
 private:
-    QVector<QPair<QPoint, bool>> m_target;
+    QVector<QPoint> m_target;
+
 };
 
 #endif // TARGET_H

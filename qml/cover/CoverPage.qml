@@ -1,22 +1,31 @@
-import QtQuick 2.0
+import QtQuick 2.6
 import Sailfish.Silica 1.0
 
 CoverBackground {
-    Label {
-        id: label
+    Column {
         anchors.centerIn: parent
-        text: qsTr("My Cover")
+        width: parent.width
+        height: level.height + score.height + lines.height
+    Label {
+        id: level
+
+        width: parent.width
+        horizontalAlignment: Text.AlignHCenter
+        text: qsTr("Level: ") + app.coverLevel
     }
+    Label {
+        id: score
 
-    CoverActionList {
-        id: coverAction
+        width: parent.width
+        horizontalAlignment: Text.AlignHCenter
+        text: qsTr("Score: ") + app.coverScore
+    }
+    Label {
+        id: lines
 
-        CoverAction {
-            iconSource: "image://theme/icon-cover-next"
-        }
-
-        CoverAction {
-            iconSource: "image://theme/icon-cover-pause"
-        }
+        width: parent.width
+        horizontalAlignment: Text.AlignHCenter
+        text: qsTr("Targets: ") + app.targetsCount
+    }
     }
 }

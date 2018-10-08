@@ -2,6 +2,7 @@
 #define BALL_H
 
 #include <QObject>
+#include <QPoint>
 
 class Ball : public QObject
 {
@@ -9,14 +10,20 @@ class Ball : public QObject
 public:
     explicit Ball(QObject *parent = nullptr);
 
+    void setStartPosition(QPoint point);
+    void moveBall(QPoint point);
+
+    bool contains(QPoint point);
+    QPoint getPoint() { return m_ball; }
+
 signals:
 
 
 public slots:
-    void upLeft();
-    void upRight();
-    void downLeft();
-    void downRight();
+
+
+private:
+    QPoint m_ball;
 };
 
 #endif // BALL_H

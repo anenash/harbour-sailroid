@@ -3,9 +3,14 @@
 
 #include <QObject>
 #include <QQmlListProperty>
+#include <QBasicTimer>
+#include <QTimerEvent>
+#include <QList>
+#include <QPoint>
 
 #include "ball.h"
 #include "trampoline.h"
+#include "target.h"
 
 const int BoardWidth = 10;
 const int BoardHeight = 20;
@@ -53,6 +58,16 @@ public:
     bool paused() { return m_paused; }
     bool muted() { return m_muted; }
 
+
+    enum BallDirection {
+        Undefined = 0,
+        UpLeft,
+        DownLeft,
+        UpRight,
+        DownRight
+    };
+    Q_ENUM(BallDirection)
+
     Q_INVOKABLE void start();
     Q_INVOKABLE void pause(bool pause);
     Q_INVOKABLE void reset();
@@ -61,8 +76,12 @@ public:
     Q_INVOKABLE void moveLeft();
     Q_INVOKABLE void moveRight();
 
+protected:
+    void timerEvent(QTimerEvent *event) override;
+
 signals:
     void gameOver();
+    void ballMove();
     void gameBoardChanged(QList<QmlPiece *> data);
     void scoreChanged(int score);
     void levelChanged(int level);
@@ -75,6 +94,11 @@ public slots:
 
 private:
     QList<QmlPiece *> m_gameBoard;
+    QBasicTimer m_timer;
+
+    Ball m_ball;
+    Trampoline m_trampoline;
+    Target m_target;
 
     int m_currentDirection;
     int m_score;
@@ -84,6 +108,19 @@ private:
     bool m_started;
     bool m_paused;
     bool m_muted;
+
+private:
+    void clearBoard();
+    void updateBoard();
+    void generateTargets();
+    bool checkTrampoline(QPoint &point);
+    bool checkTargets(QPoint &point);
+    void changeCurrentDirection(int direction, QPoint &point);
+    QPoint calculateNextPoint(int direction);
+    bool tryMove(QPoint &point);
+    inline int getShapeIndex(int x, int y) { return (y * BoardWidth) + x; }
+
+    inline int timeoutTime() { return 500 - ((m_level - 1) * 100); }
 };
 
 #endif // GAMEBOARD_H
