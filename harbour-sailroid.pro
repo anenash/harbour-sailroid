@@ -25,6 +25,7 @@ DISTFILES += qml/harbour-sailroid.qml \
     qml/pages/* \
     qml/components/* \
     qml/sounds/* \
+    qml/images/* \
     rpm/harbour-sailroid.changes.in \
     rpm/harbour-sailroid.changes.run.in \
     rpm/harbour-sailroid.spec \

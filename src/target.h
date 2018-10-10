@@ -14,6 +14,7 @@ public:
 
     void addTarget(QPoint point);
     bool contains(QPoint point);
+    void clear();
     bool empty();
     void removeTarget(QPoint point);
 

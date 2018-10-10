@@ -16,6 +16,7 @@ GameBoard::GameBoard(QObject *parent) : QObject(parent)
     m_paused = false;
     m_muted = false;
     m_targets = 0;
+    m_trampolineMoved = false;
 
     emit startedChanged(m_started);
     emit pausedChanged(m_paused);
@@ -43,6 +44,7 @@ void GameBoard::start()
     m_currentDirection = GameBoard::UpRight;
     QPoint trampolineStartPoint;
     m_trampoline.clear();
+    m_trampolineMoved = false;
     int x = BoardWidth / 4 + 1;
     for (int i = 0; i < 4; i++)
     {
@@ -63,6 +65,7 @@ void GameBoard::start()
 
 void GameBoard::generateTargets()
 {
+    m_target.clear();
     for (int j = 0; j < 5; j++)
     {
         for (int k = 0; k < BoardWidth; k++)
@@ -127,10 +130,11 @@ void GameBoard::mute()
 
 void GameBoard::moveLeft()
 {
-    if(m_paused)
+    if(m_paused || !m_started)
     {
         return;
     }
+    m_mutex.lock();
     QPoint t = m_trampoline.getLeftPoint();
     if (t.x() > 0)
     {
@@ -139,23 +143,31 @@ void GameBoard::moveLeft()
         QPoint n = calculateNextPoint(m_currentDirection);
         if(m_trampoline.contains(n))
         {
+            m_trampolineMoved = true;
             QPoint b = m_ball.getPoint();
             if (b.x() > 1)
             {
                 b.setX(b.x() - 1);
+//                qDebug() << "b.x()" << b.x() << m_currentDirection;
+                if (b.x() <= 0)
+                {
+                    m_currentDirection = GameBoard::UpRight;
+                }
             }
             m_ball.moveBall(b);
         }
     }
     updateBoard();
+    m_mutex.unlock();
 }
 
 void GameBoard::moveRight()
 {
-    if(m_paused)
+    if(m_paused || !m_started)
     {
         return;
     }
+    m_mutex.lock();
     QPoint t = m_trampoline.getRightPoint();
     if (t.x() < BoardWidth - 1)
     {
@@ -164,42 +176,53 @@ void GameBoard::moveRight()
         QPoint n = calculateNextPoint(m_currentDirection);
         if(m_trampoline.contains(n))
         {
+            m_trampolineMoved = true;
             QPoint b = m_ball.getPoint();
             if (b.x() < BoardWidth - 2)
             {
                 b.setX(b.x() + 1);
+//                qDebug() << "b.x()" << b.x() << m_currentDirection;
+                if (b.x() >= BoardWidth - 1)
+                {
+                    m_currentDirection = GameBoard::UpLeft;
+                }
             }
             m_ball.moveBall(b);
         }
     }
     updateBoard();
+    m_mutex.unlock();
 }
 
 void GameBoard::timerEvent(QTimerEvent *event)
 {
     if (event->timerId() == m_timer.timerId())
     {
+        m_mutex.lock();
         QPoint nextPoint = calculateNextPoint(m_currentDirection);
-
+//        qDebug() << "nextPoint" << nextPoint << m_currentDirection;
         if (tryMove(nextPoint))
         {
-            if (checkTrampoline(nextPoint))
+//            qDebug() << "tryMove" << nextPoint << m_currentDirection;
+            if (m_trampoline.contains(nextPoint) /*&& !m_trampolineMoved*/)
             {
+                m_trampolineMoved = false;
                 nextPoint = calculateNextPoint(m_currentDirection);
+//                qDebug() << "m_trampoline" << nextPoint << m_currentDirection;
             }
             m_ball.moveBall(nextPoint);
             emit ballMove();
         }
         else
         {
-            qDebug() << "nextPoint" << nextPoint;
-                m_timer.stop();
-                m_started = false;
-                emit startedChanged(m_started);
-                emit gameOver();
+            m_timer.stop();
+            m_started = false;
+            emit startedChanged(m_started);
+            emit gameOver();
         }
 
         updateBoard();
+        m_mutex.unlock();
     }
 }
 
@@ -291,6 +314,7 @@ bool GameBoard::checkTargets(QPoint &point)
         if ((9 >= m_level) && (m_score - (m_level * 5000) >= 0))
         {
             m_level++;
+            m_timer.start(timeoutTime(), this);
             emit levelChanged(m_level);
         }
         emit levelChanged(m_level);
@@ -303,22 +327,50 @@ bool GameBoard::checkTargets(QPoint &point)
 QPoint GameBoard::calculateNextPoint(int direction)
 {
     QPoint point = m_ball.getPoint();
+    int x;
+    int y;
     switch (direction) {
     case GameBoard::UpRight:
-        point.setX(point.x() + 1);
-        point.setY(point.y() - 1);
+        x = point.x() + 1;
+        y = point.y() - 1;
+        if (x < BoardWidth)
+        {
+            point.setX(x);
+        }
+        if (y >= 0)
+        {
+            point.setY(y);
+        }
         break;
     case GameBoard::DownLeft:
-        point.setX(point.x() - 1);
-        point.setY(point.y() + 1);
+        x = point.x() - 1;
+        y = point.y() + 1;
+        if (x >= 0)
+        {
+            point.setX(x);
+        }
+        point.setY(y);
         break;
     case GameBoard::UpLeft:
-        point.setX(point.x() - 1);
-        point.setY(point.y() - 1);
+        x = point.x() - 1;
+        y = point.y() - 1;
+        if (x >= 0)
+        {
+            point.setX(x);
+        }
+        if (y >= 0)
+        {
+            point.setY(y);
+        }
         break;
     case GameBoard::DownRight:
-        point.setX(point.x() + 1);
-        point.setY(point.y() + 1);
+        x = point.x() + 1;
+        y = point.y() + 1;
+        if (x < BoardWidth)
+        {
+            point.setX(x);
+        }
+        point.setY(y);
         break;
     default:
         break;
@@ -332,7 +384,7 @@ void GameBoard::changeCurrentDirection(int direction, QPoint &point)
     case GameBoard::UpRight:
         if (point.y() == 0)
         {
-            if (point.x() == BoardWidth - 1)
+            if (point.x() >= BoardWidth - 1)
             {
                 m_currentDirection = GameBoard::DownLeft;
             }
@@ -343,7 +395,10 @@ void GameBoard::changeCurrentDirection(int direction, QPoint &point)
         }
         else
         {
-            m_currentDirection = GameBoard::UpLeft;
+            if (point.x() > 0)
+            {
+                m_currentDirection = GameBoard::UpLeft;
+            }
         }
         break;
     case GameBoard::DownLeft:
@@ -352,7 +407,7 @@ void GameBoard::changeCurrentDirection(int direction, QPoint &point)
     case GameBoard::UpLeft:
         if (point.y() == 0)
         {
-            if (point.x() == 0)
+            if (point.x() <= 0)
             {
                 m_currentDirection = GameBoard::DownRight;
             }
@@ -363,7 +418,10 @@ void GameBoard::changeCurrentDirection(int direction, QPoint &point)
         }
         else
         {
-            m_currentDirection = GameBoard::UpRight;
+            if (point.x() < BoardWidth - 1)
+            {
+                m_currentDirection = GameBoard::UpRight;
+            }
         }
         break;
     case GameBoard::DownRight:

@@ -26,3 +26,8 @@ bool Target::empty()
 {
     return m_target.empty();
 }
+
+void Target::clear()
+{
+    m_target.clear();
+}

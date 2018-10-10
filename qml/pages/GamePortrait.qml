@@ -40,6 +40,24 @@ Item {
         border.width: 4
     }
 
+    Image {
+        id: leftBorderImage
+
+        anchors.right: gameFieldBorders.left
+        anchors.rightMargin: Theme.paddingMedium
+        anchors.verticalCenter: gameFieldBorders.verticalCenter
+        source: "../images/border.png"
+    }
+
+    Image {
+        id: rightBorderImage
+
+        anchors.left: gameFieldBorders.right
+        anchors.leftMargin: Theme.paddingMedium
+        anchors.verticalCenter: gameFieldBorders.verticalCenter
+        source: "../images/border.png"
+    }
+
     Item {
         id: game
 

@@ -7,6 +7,7 @@
 #include <QTimerEvent>
 #include <QList>
 #include <QPoint>
+#include <QMutex>
 
 #include "ball.h"
 #include "trampoline.h"
@@ -108,6 +109,9 @@ private:
     bool m_started;
     bool m_paused;
     bool m_muted;
+
+    QMutex m_mutex;
+    bool m_trampolineMoved;
 
 private:
     void clearBoard();
